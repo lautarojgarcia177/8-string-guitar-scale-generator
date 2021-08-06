@@ -40,6 +40,7 @@
               "node_modules/lodash/lodash.min.js",
               "node_modules/backbone/backbone-min.js",
               "node_modules/jointjs/dist/joint.min.js",
+              "node_modules/popper/index.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js"
             ]
           },
@@ -116,6 +117,7 @@
               "node_modules/lodash/lodash.min.js",
               "node_modules/backbone/backbone-min.js",
               "node_modules/jointjs/dist/joint.min.js",
+              "node_modules/popper/index.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js"
             ]
           }

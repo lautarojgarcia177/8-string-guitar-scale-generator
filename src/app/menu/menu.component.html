@@ -1,1 +1,14 @@
-<p>menu works!</p>
+<div class="d-flex flex-wrap justify-content-start">
+    <div class="mb-3 me-3 d-flex align-items-center">
+        <label class="me-2">Root&nbsp;note:</label>
+        <select #rootNoteSelect class="form-select" aria-label="Root note" (change)="onRootNoteChange(rootNoteSelect.value)">
+            <option *ngFor="let note of musicalNotes" [value]="note">{{note}}</option>
+        </select>
+    </div>
+    <div class="mb-3 me-3 d-flex align-items-center">
+        <label class="me-2">Scale:</label>
+        <select #scaleSelect class="form-select" aria-label="Scale" (change)="onScaleChange(scaleSelect.value)">
+            <option *ngFor="let scale of musicalScales" [value]="scale">{{scale}}</option>
+        </select>
+    </div>
+</div>

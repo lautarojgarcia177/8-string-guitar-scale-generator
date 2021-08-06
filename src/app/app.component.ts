@@ -8,8 +8,19 @@ import { dia, shapes } from 'jointjs';
 })
 export class AppComponent {
 
+  public rootNote: string;
+  public scale: string;
+
   constructor() {
 
+  }
+
+  onRootNoteChange(rootNote: string) {
+    this.rootNote = rootNote;
+  }
+
+  onScaleChange(scale: string) {
+    this.scale = scale;
   }
 
 }

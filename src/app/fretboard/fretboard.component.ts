@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
 import { dia, shapes } from 'jointjs';
 
 @Component({
@@ -6,27 +7,38 @@ import { dia, shapes } from 'jointjs';
   templateUrl: './fretboard.component.html',
   styleUrls: ['./fretboard.component.scss']
 })
-export class FretboardComponent implements OnInit {
+export class FretboardComponent implements OnInit, AfterViewInit, OnChanges {
+
+  @Input() rootNote: string;
+  @Input() scale: string;
 
   @ViewChild('jointCanvas') jointCanvas: ElementRef;
 
   private graph: dia.Graph;
   private paper: dia.Paper;
 
-
-  private notes = ['C', 'C#', 'D', 'D#','E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  private tunnings = {
-    standard: []
-  };
-  // private fifthStringNotes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#','E', 'F', 'F#', 'G', 'G#'];
-  // private sixthStringNotes = ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'];
-
+  private firstStringNotes = ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'];
+  private secondStringNotes = ['B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#'];
+  private thirdStringNotes = ['G', 'G#', 'A', 'A#', 'B', 'C','C#', 'D', 'D#', 'E', 'F', 'F#'];
+  private fourthStringNotes = ['D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#'];
+  private fifthStringNotes = ['A', 'A#', 'B', 'C', 'C#','D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
+  private sixthStringNotes = ['E', 'F', 'F#', 'G', 'G#', 'A','A#', 'B', 'C', 'C#', 'D', 'D#'];
+  private seventhStringNotes = ['B', 'C', 'C#', 'D', 'D#','E', 'F', 'F#', 'G', 'G#', 'A', 'A#'];
+  private eigththStringNotes = ['F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F'];
   private fretboardNotes = [
-    // this.fifthStringNotes,
-    // this.sixthStringNotes
+    this.firstStringNotes,
+    this.secondStringNotes, 
+    this.thirdStringNotes,
+    this.fourthStringNotes, 
+    this.fifthStringNotes,
+    this.sixthStringNotes,
+    this.seventhStringNotes,
+    this.eigththStringNotes,
   ];
-  private fretboardHeight = 250;
 
+  private fretboardHeight = 325;
+  private stringGap = this.fretboardHeight / 9;
+  private xFretPositions = [];
 
   constructor() { }
 
@@ -42,158 +54,131 @@ export class FretboardComponent implements OnInit {
       height: this.fretboardHeight,
       interactive: false
     });
-    this.draw();
-    // this.generateScale();
+    this.drawCanvas();
+    this.drawNotes();
   }
 
-  draw() {
+  ngOnChanges(simpleChanges: SimpleChanges) {
+    console.log(simpleChanges);
+    this.drawNotes();
+  }
+
+  drawCanvas() {
+    this.calculateFretPositions();
     this.drawFretboard();
     this.drawStrings();
   }
 
   onWindowResize(event: any) {
     this.graph.clear();
-    this.draw();
+    this.drawCanvas();
   }
 
-  // private generateScale() {
-  //   const CmajorScale = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-  //   const eStringMajorScale = this.eStringNotes.filter(note => CmajorScale.includes(note));
-  //   console.log(eStringMajorScale);
-  //   let eStringMajorScaleFretboardNotesElements = [];
-  //   let currentPosition = 0;
-  //   eStringMajorScale.forEach(note => {
-  //     eStringMajorScaleFretboardNotesElements.push(new shapes.standard.Circle({
-  //       position: {
-  //         x: currentPosition + 50,
-  //         y: 180
-  //       },
-  //       size: {
-  //         height: 30,
-  //         width: 30
-  //       },
-  //       attrs: {
-  //         body: {
-  //           fill: 'lightblue'
-  //         },
-  //         label: {
-  //           text: note
-  //         }
-  //       }
-  //     }))
-  //     currentPosition += 100;
-  //   });
-  //   eStringMajorScaleFretboardNotesElements.forEach(el => el.addTo(this.graph));
-  //   eStringMajorScaleFretboardNotesElements.forEach((el, index) => {
-  //     if (index < eStringMajorScaleFretboardNotesElements.length - 1) {
-  //       let stringLink = new shapes.standard.Link();
-  //       stringLink.source(el);
-  //       stringLink.target(eStringMajorScaleFretboardNotesElements[index + 1]);
-  //       stringLink.attr({
-  //         line: {
-  //           targetMarker: {
-  //             'type': 'path',
-  //             'stroke': 'none',
-  //             'fill': '#3498DB',
-  //             'd': ''
-  //           }
-  //         }
-  //       })
-  //       stringLink.addTo(this.graph);
-  //     }
-  //   })
-  // }
-
-  private drawFretboard() {
+  private calculateFretPositions() {
     const fretboardWidth = this.jointCanvas.nativeElement.offsetWidth;
     const scaleLength = fretboardWidth * 2;
     let distance = 0;
-    let previousDistance = distance;
-    let inlayFrets = [3, 5, 7, 9];
     for (let i = 0; i < 12; i++) {
       const location = scaleLength - distance;
       const scaling_factor = location / 17.817;
       distance = distance + scaling_factor;
+      this.xFretPositions.push(distance);
+    }
+  }
+
+  private drawNotes() {
+    let yPosition = 0;
+    const xPositions = [ 0 , ...this.xFretPositions ];
+    const cMajorScale = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+    // const selectedScaleFretboardNotes = this.fretboardNotes.map(stringNotes => stringNotes.filter(note => cMajorScale.includes(note)));
+    for (let guitarString of this.fretboardNotes) {
+      yPosition += this.stringGap;
+      for (let i = 0; i < guitarString.length ; i++) {
+        const noteElement = new shapes.standard.Circle({
+          position: {
+            x: (xPositions[i] + xPositions[i + 1]) / 2 - 15,
+            y: yPosition - 15
+          },
+          size: {
+            height: 30,
+            width: 30,
+          },
+          attrs: {
+            body: {
+              fill: 'lightblue',
+              opacity: cMajorScale.includes(guitarString[i]) ? 1 : 0
+            },
+            label: {
+              text: guitarString[i]
+            }
+          }
+        });
+        noteElement.addTo(this.graph);
+      }
+    }
+  }
+
+  private drawFretboard() {
+    let inlayFrets = [3, 5, 7, 9];
+    // draw frets
+    for (let i = 0; i < 12; i++) {
       if (i === 0) {
         // draw nut
         const nut = new shapes.standard.Rectangle({
           position: {
-            x: distance * 0.7,
+            x: this.xFretPositions[i] * 0.8,
             y: 0
           },
           size: {
             height: this.fretboardHeight,
-            width: distance * 0.3
+            width: this.xFretPositions[i] * 0.2
           }
         });
         nut.addTo(this.graph);
       }
-      const topOfTheFret = new shapes.standard.Circle({
+      const fret = new shapes.standard.Rectangle({
         position: {
-          x: distance,
+          x: this.xFretPositions[i],
           y: 0
         },
         size: {
-          height: 1,
-          width: 1
-        }
-      });
-      const endOfTheFret = new shapes.standard.Circle({
-        position: {
-          x: distance,
-          y: this.jointCanvas.nativeElement.offsetHeight
-        },
-        size: {
-          height: 1,
-          width: 1
-        }
-      });
-      const fretLink = new shapes.standard.Link();
-      fretLink.source(topOfTheFret);
-      fretLink.target(endOfTheFret);
-      fretLink.attr({
-        line: {
-          targetMarker: {
-            'type': 'path',
-            'stroke': 'none',
-            'fill': '#3498DB',
-            'd': ''
+          height: this.fretboardHeight,
+          width: 5
+        }, attrs: {
+          body: {
+            fill: 'white'
           }
         }
       });
+      fret.addTo(this.graph);
       if (inlayFrets.includes(i)) {
         // draw inlay in this fret
-          const inlay = new shapes.standard.Circle({
-            position: {
-              x: (previousDistance + distance) / 2 - 10,
-              y: this.fretboardHeight / 2 - 10
-            },
-            size: {
-              height: 20,
-              width: 20
-            },
-            attrs: {
-              body: {
-                fill: 'white'
-              }
+        const inlay = new shapes.standard.Circle({
+          position: {
+            x: (this.xFretPositions[i - 1] + this.xFretPositions[i]) / 2 - 10,
+            y: this.fretboardHeight / 2 - 10
+          },
+          size: {
+            height: 20,
+            width: 20
+          },
+          attrs: {
+            body: {
+              fill: 'white'
             }
-          });
-          inlay.addTo(this.graph);
+          }
+        });
+        inlay.addTo(this.graph);
       }
-      previousDistance = distance;
-      topOfTheFret.addTo(this.graph);
-      endOfTheFret.addTo(this.graph);
-      fretLink.addTo(this.graph);
     }
   }
 
   private drawStrings() {
-    const stringGap = this.fretboardHeight / 9;
-    for(let i = 1; i <= 8; i++) {
+    for (let i = 1; i <= 8; i++) {
       const startOfString = new shapes.standard.Circle({
         position: {
           x: 0,
-          y: stringGap * i
+          y: this.stringGap * i
         },
         size: {
           height: 1,
@@ -203,7 +188,7 @@ export class FretboardComponent implements OnInit {
       const endOfString = new shapes.standard.Circle({
         position: {
           x: this.jointCanvas.nativeElement.offsetWidth,
-          y: stringGap * i
+          y: this.stringGap * i
         },
         size: {
           height: 1,
