@@ -14,7 +14,7 @@
     <div class="mb-3 me-3 d-flex align-items-center">
         <label class="me-2">Scale:</label>
         <select #scaleSelect class="form-select" aria-label="Scale" (change)="onScaleChange(scaleSelect.value)">
-            <option *ngFor="let scale of musicalScales" [value]="scale">{{scale}}</option>
+            <option *ngFor="let scale of musicalScales" [value]="scale">{{scale.name}}</option>
         </select>
     </div>
 </div>
