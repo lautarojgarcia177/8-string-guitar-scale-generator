@@ -1,5 +1,11 @@
 <div class="d-flex flex-wrap justify-content-start">
     <div class="mb-3 me-3 d-flex align-items-center">
+        <label class="me-2">Tunning:</label>
+        <select #tunningSelect class="form-select" aria-label="Root note" (change)="onRootNoteChange(tunningSelect.value)">
+            <option *ngFor="let tunning of guitarTunnings" [value]="tunning">{{tunning.name}}</option>
+        </select>
+    </div>
+    <div class="mb-3 me-3 d-flex align-items-center">
         <label class="me-2">Root&nbsp;note:</label>
         <select #rootNoteSelect class="form-select" aria-label="Root note" (change)="onRootNoteChange(rootNoteSelect.value)">
             <option *ngFor="let note of musicalNotes" [value]="note">{{note}}</option>

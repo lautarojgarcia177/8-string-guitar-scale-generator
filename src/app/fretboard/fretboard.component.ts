@@ -1,7 +1,7 @@
 import { SimpleChanges } from '@angular/core';
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
 import { dia, shapes } from 'jointjs';
-import { GuitarScalesService, GuitarTunning } from '../guitar-scales.service';
+import { EMusicalNotes, GuitarScalesService, GuitarTunning } from '../guitar-scales.service';
 import { GuitarStringsNotes } from '../models/guitar-string-notes';
 
 @Component({
@@ -9,11 +9,11 @@ import { GuitarStringsNotes } from '../models/guitar-string-notes';
   templateUrl: './fretboard.component.html',
   styleUrls: ['./fretboard.component.scss']
 })
-export class FretboardComponent implements OnInit, AfterViewInit, OnChanges {
+export class FretboardComponent implements OnInit, AfterViewInit {
 
   @ViewChild('jointCanvas') jointCanvas: ElementRef;
 
-  private graph: dia.Graph;
+  private graph: dia.Graph = new dia.Graph;
   private paper: dia.Paper;
 
   private fretboardHeight = 325;
@@ -23,7 +23,6 @@ export class FretboardComponent implements OnInit, AfterViewInit, OnChanges {
   constructor(private guitarScalesService: GuitarScalesService) { }
 
   ngOnInit() {
-    const graph = this.graph = new dia.Graph;
   }
 
   ngAfterViewInit() {
@@ -35,12 +34,7 @@ export class FretboardComponent implements OnInit, AfterViewInit, OnChanges {
       interactive: false
     });
     this.drawCanvas();
-    this.drawNotes(['A', 'B', 'C']);
-  }
-
-  ngOnChanges(simpleChanges: SimpleChanges) {
-    console.log(simpleChanges);
-    this.drawNotes(['A', 'B', 'C']);
+    this.drawNotes();
   }
 
   drawCanvas() {
@@ -66,11 +60,11 @@ export class FretboardComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
 
-  private drawNotes(guitarScale: string[]) {
+  private drawNotes() {
     let yPosition = 0;
     const xPositions = [0, ...this.xFretPositions];
     const fretboardNotes = this.guitarScalesService.calculateFretboardNotes(this.guitarScalesService.tunnings[1]);
-    const musicalScale = this.guitarScalesService.calculateMusicalScaleNotes();
+    const musicalScale = this.guitarScalesService.calculateMusicalScaleNotes(this.guitarScalesService.musicalScales[0], EMusicalNotes.C);
     for (let guitarString of fretboardNotes) {
       yPosition += this.stringGap;
       for (let i = 0; i < guitarString.length; i++) {

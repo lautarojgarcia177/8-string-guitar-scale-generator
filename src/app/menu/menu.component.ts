@@ -10,7 +10,7 @@ export class MenuComponent implements OnInit {
 
   musicalNotes = this.guitarScalesService.musicalNotes;
   musicalScales = this.guitarScalesService.musicalScales;
-  tunnings = this.guitarScalesService.tunnings;
+  guitarTunnings = this.guitarScalesService.tunnings;
 
   constructor(private guitarScalesService: GuitarScalesService) { }
 
