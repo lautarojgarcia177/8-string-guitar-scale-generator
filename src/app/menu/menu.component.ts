@@ -1,4 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { GuitarScalesService } from '../guitar-scales.service';
 
 @Component({
   selector: 'app-menu',
@@ -7,26 +8,25 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 })
 export class MenuComponent implements OnInit {
 
-  public musicalNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  public musicalScales = ['Chromatic', 'Mayor', 'Minor'];
-  public tunnings = {
-    standard: []
-  };
+  musicalNotes = this.guitarScalesService.musicalNotes;
+  musicalScales = this.guitarScalesService.musicalScales;
+  tunnings = this.guitarScalesService.tunnings;
 
-  @Output() rootNoteChange = new EventEmitter<string>();
-  @Output() scaleChange = new EventEmitter<string>();
-
-  constructor() { }
+  constructor(private guitarScalesService: GuitarScalesService) { }
 
   ngOnInit(): void {
   }
 
-  onRootNoteChange(selectedRootNote: string) {
-    this.rootNoteChange.emit(selectedRootNote);
+  onScaleChange(scale) {
+
   }
 
-  onScaleChange(selectedScale: string) {
-    this.rootNoteChange.emit(selectedScale);
+  onTunningChange(tunning) {
+
+  }
+
+  onRootNoteChange(scale) {
+
   }
 
 }

@@ -1,6 +1,8 @@
 import { SimpleChanges } from '@angular/core';
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
 import { dia, shapes } from 'jointjs';
+import { GuitarScalesService, GuitarTunning } from '../guitar-scales.service';
+import { GuitarStringsNotes } from '../models/guitar-string-notes';
 
 @Component({
   selector: 'app-fretboard',
@@ -9,38 +11,16 @@ import { dia, shapes } from 'jointjs';
 })
 export class FretboardComponent implements OnInit, AfterViewInit, OnChanges {
 
-  @Input() rootNote: string;
-  @Input() scale: string;
-
   @ViewChild('jointCanvas') jointCanvas: ElementRef;
 
   private graph: dia.Graph;
   private paper: dia.Paper;
 
-  private firstStringNotes = ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'];
-  private secondStringNotes = ['B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#'];
-  private thirdStringNotes = ['G', 'G#', 'A', 'A#', 'B', 'C','C#', 'D', 'D#', 'E', 'F', 'F#'];
-  private fourthStringNotes = ['D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#'];
-  private fifthStringNotes = ['A', 'A#', 'B', 'C', 'C#','D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
-  private sixthStringNotes = ['E', 'F', 'F#', 'G', 'G#', 'A','A#', 'B', 'C', 'C#', 'D', 'D#'];
-  private seventhStringNotes = ['B', 'C', 'C#', 'D', 'D#','E', 'F', 'F#', 'G', 'G#', 'A', 'A#'];
-  private eigththStringNotes = ['F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F'];
-  private fretboardNotes = [
-    this.firstStringNotes,
-    this.secondStringNotes, 
-    this.thirdStringNotes,
-    this.fourthStringNotes, 
-    this.fifthStringNotes,
-    this.sixthStringNotes,
-    this.seventhStringNotes,
-    this.eigththStringNotes,
-  ];
-
   private fretboardHeight = 325;
   private stringGap = this.fretboardHeight / 9;
   private xFretPositions = [];
 
-  constructor() { }
+  constructor(private guitarScalesService: GuitarScalesService) { }
 
   ngOnInit() {
     const graph = this.graph = new dia.Graph;
@@ -55,12 +35,12 @@ export class FretboardComponent implements OnInit, AfterViewInit, OnChanges {
       interactive: false
     });
     this.drawCanvas();
-    this.drawNotes();
+    this.drawNotes(['A', 'B', 'C']);
   }
 
   ngOnChanges(simpleChanges: SimpleChanges) {
     console.log(simpleChanges);
-    this.drawNotes();
+    this.drawNotes(['A', 'B', 'C']);
   }
 
   drawCanvas() {
@@ -86,14 +66,14 @@ export class FretboardComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
 
-  private drawNotes() {
+  private drawNotes(guitarScale: string[]) {
     let yPosition = 0;
-    const xPositions = [ 0 , ...this.xFretPositions ];
-    const cMajorScale = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-    // const selectedScaleFretboardNotes = this.fretboardNotes.map(stringNotes => stringNotes.filter(note => cMajorScale.includes(note)));
-    for (let guitarString of this.fretboardNotes) {
+    const xPositions = [0, ...this.xFretPositions];
+    const fretboardNotes = this.guitarScalesService.calculateFretboardNotes(this.guitarScalesService.tunnings[1]);
+    const musicalScale = this.guitarScalesService.calculateMusicalScaleNotes();
+    for (let guitarString of fretboardNotes) {
       yPosition += this.stringGap;
-      for (let i = 0; i < guitarString.length ; i++) {
+      for (let i = 0; i < guitarString.length; i++) {
         const noteElement = new shapes.standard.Circle({
           position: {
             x: (xPositions[i] + xPositions[i + 1]) / 2 - 15,
@@ -106,7 +86,7 @@ export class FretboardComponent implements OnInit, AfterViewInit, OnChanges {
           attrs: {
             body: {
               fill: 'lightblue',
-              opacity: cMajorScale.includes(guitarString[i]) ? 1 : 0
+              opacity: musicalScale.includes(guitarString[i]) ? 1 : 0
             },
             label: {
               text: guitarString[i]
