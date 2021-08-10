@@ -1,20 +1,20 @@
 <div class="d-flex flex-wrap justify-content-start">
     <div class="mb-3 me-3 d-flex align-items-center">
         <label class="me-2">Tunning:</label>
-        <select #tunningSelect class="form-select" aria-label="Root note" (change)="onRootNoteChange(tunningSelect.value)">
-            <option *ngFor="let tunning of guitarTunnings" [value]="tunning">{{tunning.name}}</option>
+        <select name="selectTunning" class="form-select" aria-label="Root note" [(ngModel)]="guitarTunning" (change)="onTunningChange()">
+            <option *ngFor="let tunning of guitarTunnings" [ngValue]="tunning">{{tunning.name}}</option>
         </select>
     </div>
     <div class="mb-3 me-3 d-flex align-items-center">
         <label class="me-2">Root&nbsp;note:</label>
-        <select #rootNoteSelect class="form-select" aria-label="Root note" (change)="onRootNoteChange(rootNoteSelect.value)">
-            <option *ngFor="let note of musicalNotes" [value]="note">{{note}}</option>
+        <select name="selectRootNote" class="form-select" aria-label="Root note" [(ngModel)]="rootNote" (change)="onRootNoteChange()">
+            <option *ngFor="let note of musicalNotes" [ngValue]="note">{{note}}</option>
         </select>
     </div>
     <div class="mb-3 me-3 d-flex align-items-center">
         <label class="me-2">Scale:</label>
-        <select #scaleSelect class="form-select" aria-label="Scale" (change)="onScaleChange(scaleSelect.value)">
-            <option *ngFor="let scale of musicalScales" [value]="scale">{{scale.name}}</option>
+        <select name="selectScale" class="form-select" aria-label="Scale" [(ngModel)]="musicalScale" (change)="onMusicalScaleChange()">
+            <option *ngFor="let scale of musicalScales" [ngValue]="scale">{{scale.name}}</option>
         </select>
     </div>
 </div>

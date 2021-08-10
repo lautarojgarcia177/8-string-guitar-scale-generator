@@ -1,31 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
-
-export interface GuitarTunning {
-  name: string,
-  stringsTunnings: EMusicalNotes[]
-}
-
-export interface MusicalScale {
-  name: string,
-  // a whole interval is 2, half interval is 1
-  intervals: number[]
-}
-
-export enum EMusicalNotes {
-  C = 'C',
-  Db = 'Db',
-  D = 'D',
-  Eb = 'Eb',
-  E = 'E',
-  F = 'F',
-  Gb = 'Gb',
-  G = 'G',
-  Ab = 'Ab',
-  A = 'A',
-  Bb = 'Bb',
-  B = 'B'
-}
+import { EMusicalNotes, GuitarTunning, MusicalScale } from './models/interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -59,32 +34,6 @@ export class GuitarScalesService {
       index++;
     }
   }
-
-  public readonly musicalScales: MusicalScale[] = [
-    {
-      name: 'Major',
-      intervals: [2, 2, 1, 2, 2, 2, 1]
-    },
-    {
-      name: 'Minor',
-      intervals: [2, 1, 2, 2, 1, 2, 2]
-    },
-    {
-      name: 'Chromatic',
-      intervals: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    }
-  ];
-
-  public readonly tunnings: GuitarTunning[] = [
-    {
-      name: 'Standard',
-      stringsTunnings: [EMusicalNotes.E, EMusicalNotes.B, EMusicalNotes.G, EMusicalNotes.D, EMusicalNotes.A, EMusicalNotes.E, EMusicalNotes.B, EMusicalNotes.Gb]
-    },
-    {
-      name: 'Drop E',
-      stringsTunnings: [EMusicalNotes.E, EMusicalNotes.B, EMusicalNotes.G, EMusicalNotes.D, EMusicalNotes.A, EMusicalNotes.E, EMusicalNotes.B, EMusicalNotes.E]
-    }
-  ];
 
   constructor() { }
 

@@ -1,8 +1,13 @@
-import { SimpleChanges } from '@angular/core';
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
 import { dia, shapes } from 'jointjs';
-import { EMusicalNotes, GuitarScalesService, GuitarTunning } from '../guitar-scales.service';
-import { GuitarStringsNotes } from '../models/guitar-string-notes';
+import { GuitarScalesService } from '../guitar-scales.service';
+import { EMusicalNotes } from '../models/interfaces';
+import { musicalScales } from '../models/musicalScales';
+import { guitarTunnings } from '../models/guitarTunnings';
+import { AppState } from '../store/state';
+import { Store } from '@ngrx/store';
+import * as selectors from '../store/selectors';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-fretboard',
@@ -15,12 +20,16 @@ export class FretboardComponent implements OnInit, AfterViewInit {
 
   private graph: dia.Graph = new dia.Graph;
   private paper: dia.Paper;
+  private graphCells__notes: dia.Cell[];
 
   private fretboardHeight = 325;
   private stringGap = this.fretboardHeight / 9;
   private xFretPositions = [];
 
-  constructor(private guitarScalesService: GuitarScalesService) { }
+  private scaleGeneratorParameters$: Observable<AppState> = this.store.select(selectors.selectScaleGeneratorParameters);
+  private scaleGeneratorParameters: AppState;
+
+  constructor(private guitarScalesService: GuitarScalesService, private store: Store<AppState>) { }
 
   ngOnInit() {
   }
@@ -34,7 +43,12 @@ export class FretboardComponent implements OnInit, AfterViewInit {
       interactive: false
     });
     this.drawCanvas();
-    this.drawNotes();
+    this.scaleGeneratorParameters$.subscribe(p => {
+      this.scaleGeneratorParameters = p;
+      this.graph.clear();
+      this.drawCanvas();
+      this.drawNotes();
+    });
   }
 
   drawCanvas() {
@@ -46,6 +60,7 @@ export class FretboardComponent implements OnInit, AfterViewInit {
   onWindowResize(event: any) {
     this.graph.clear();
     this.drawCanvas();
+    this.drawNotes();
   }
 
   private calculateFretPositions() {
@@ -63,8 +78,10 @@ export class FretboardComponent implements OnInit, AfterViewInit {
   private drawNotes() {
     let yPosition = 0;
     const xPositions = [0, ...this.xFretPositions];
-    const fretboardNotes = this.guitarScalesService.calculateFretboardNotes(this.guitarScalesService.tunnings[1]);
-    const musicalScale = this.guitarScalesService.calculateMusicalScaleNotes(this.guitarScalesService.musicalScales[0], EMusicalNotes.C);
+    const fretboardNotes = this.guitarScalesService.calculateFretboardNotes(this.scaleGeneratorParameters.guitarTunning);
+    const musicalScale = this.guitarScalesService.calculateMusicalScaleNotes(this.scaleGeneratorParameters.musicalScale, this.scaleGeneratorParameters.rootNote);
+    this.graph.removeCells(this.graphCells__notes);
+    this.graphCells__notes = [];
     for (let guitarString of fretboardNotes) {
       yPosition += this.stringGap;
       for (let i = 0; i < guitarString.length; i++) {
@@ -87,8 +104,9 @@ export class FretboardComponent implements OnInit, AfterViewInit {
             }
           }
         });
-        noteElement.addTo(this.graph);
+        this.graphCells__notes.push(noteElement);
       }
+      this.graph.addCells(this.graphCells__notes);
     }
   }
 
